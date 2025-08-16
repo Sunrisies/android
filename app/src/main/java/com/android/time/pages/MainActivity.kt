@@ -1,5 +1,6 @@
 package com.android.time.pages
 
+import IMqttCallback
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,11 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.time.ui.theme.TimeTheme
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 
 
 class MainActivity : ComponentActivity() {
@@ -77,6 +74,20 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 
     val mqttClientWrapper = MqttClientWrapper.getInstance("tcp://broker.emqx.io:1883", "21312312321", )
+    mqttClientWrapper.setCallback(object : IMqttCallback {
+        override fun onConnectionLost(cause: Throwable) {
+            println("连接丢失: $cause")
+        }
+
+        override fun onDeliveryComplete(token: IMqttDeliveryToken) {
+            println("消息发送完成: $token")
+        }
+
+        override fun onMessageArrived(topic: String, message: MqttMessage) {
+            println("接收到消息: $topic, $message")
+        }
+    })
+
     mqttClientWrapper.connect()
     mqttClientWrapper.subscribe("D925070003")
     mqttClientWrapper.publish("925070003","Hello MQTT")
