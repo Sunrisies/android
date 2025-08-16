@@ -12,6 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.time.ui.theme.TimeTheme
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttException
+import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +43,44 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         text = "Hello $name!",
         modifier = modifier
     )
+//    try {
+//        val persistence = MemoryPersistence()
+//        val client = MqttClient("tcp://broker.emqx.io:1883", "2121122121", persistence)
+//
+//        client.setCallback(object : MqttCallback {
+//            override fun connectionLost(cause: Throwable) {
+//                System.out.println("连接丢失: $cause")
+//
+//            }
+//
+//            override fun deliveryComplete(token: IMqttDeliveryToken) {
+//                System.out.println("消息发送完成: $token")
+//            }
+//
+//            override fun messageArrived(topic: String, message: MqttMessage) {
+//                System.out.println("接收到消息: $topic, $message")
+//            }
+//        })
+//        try {
+//            client.connect()
+//            client.subscribe("D925070003", 1)
+//            val message = MqttMessage("Hello MQTT".toByteArray())
+//            client.publish("925070003", message)
+//            client.disconnect()
+//        } catch (e: MqttException) {
+//            System.out.println("12121221: ${e}")
+//            e.printStackTrace()
+//        }
+//    }catch (e:MqttException){
+//        System.out.println("eeeeee:${e}")
+//    }
+
+
+    val mqttClientWrapper = MqttClientWrapper.getInstance("tcp://broker.emqx.io:1883", "21312312321", )
+    mqttClientWrapper.connect()
+    mqttClientWrapper.subscribe("D925070003")
+    mqttClientWrapper.publish("925070003","Hello MQTT")
+//    mqttClientWrapper.disconnect()
 }
 
 @Preview(showBackground = true)

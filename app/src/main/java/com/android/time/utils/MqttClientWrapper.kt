@@ -1,14 +1,30 @@
-package com.android.time.utils
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttException
-class MqttClientWrapper(val brokerAddress: String, val clientId: String, val topi c: String) {
+import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+
+class MqttClientWrapper private constructor(val brokerAddress: String, val clientId: String) {
+    companion object {
+        // 单例对象
+        private var instance: MqttClientWrapper? = null
+
+        // 获取单例对象的方法
+        fun getInstance(brokerAddress: String, clientId: String): MqttClientWrapper {
+            System.out.println("21121212");
+            return instance ?: synchronized(MqttClientWrapper::class) {
+                instance ?: MqttClientWrapper(brokerAddress, clientId)
+            }.also { instance = it }
+        }
+    }
+
     private var client: MqttClient? = null
 
     init {
-        client = MqttClient(brokerAddress, clientId)
+        val persistence = MemoryPersistence()
+
+        client = MqttClient(brokerAddress, clientId,persistence)
         client?.setCallback(object : MqttCallback {
             override fun connectionLost(cause: Throwable) {
                 println("连接丢失: $cause")
@@ -32,7 +48,7 @@ class MqttClientWrapper(val brokerAddress: String, val clientId: String, val top
         }
     }
 
-    fun subscribe() {
+    fun subscribe(topic:String) {
         try {
             client?.subscribe(topic, 1)
         } catch (e: MqttException) {
@@ -40,7 +56,7 @@ class MqttClientWrapper(val brokerAddress: String, val clientId: String, val top
         }
     }
 
-    fun publish(message: String) {
+    fun publish(topic:String,message: String) {
         try {
             val mqttMessage = MqttMessage(message.toByteArray())
             client?.publish(topic, mqttMessage)
@@ -57,3 +73,4 @@ class MqttClientWrapper(val brokerAddress: String, val clientId: String, val top
         }
     }
 }
+
